@@ -57,12 +57,13 @@ fi
 # =============================================================================
 # Step 2: Check/Download TDB Database
 # =============================================================================
-DATA_DIR="/home/trinitycore/server/data"
-TDB_FILE=$(ls "$DATA_DIR"/TDB_full_world_335*.sql 2>/dev/null | head -1)
+# TDB file must be in the bin directory where worldserver runs
+BIN_DIR="/home/trinitycore/server/bin"
+TDB_FILE=$(ls "$BIN_DIR"/TDB_full_world_335*.sql 2>/dev/null | head -1)
 
 if [ -z "$TDB_FILE" ]; then
     echo ""
-    echo "TDB world database file not found in $DATA_DIR"
+    echo "TDB world database file not found in $BIN_DIR"
     echo "This is required to populate the world database."
     echo ""
     if prompt_yes_no "Download latest TDB database from GitHub?"; then
@@ -79,41 +80,41 @@ if [ -z "$TDB_FILE" ]; then
             echo "Could not find TDB download URL from GitHub releases."
             echo "Please download manually from:"
             echo "  https://github.com/TrinityCore/TrinityCore/releases"
-            echo "Look for TDB_full_world_335.*.7z and extract the .sql file to data/"
+            echo "Look for TDB_full_world_335.*.7z and extract the .sql file to bin/"
         else
             FILENAME=$(basename "$DOWNLOAD_URL")
             echo "Downloading: $FILENAME"
             curl -L -o "/tmp/$FILENAME" "$DOWNLOAD_URL"
             
             echo "Extracting..."
-            cd "$DATA_DIR"
+            cd "$BIN_DIR"
             
             # Check if 7z or p7zip is available
             if command -v 7z &> /dev/null; then
-                7z x "/tmp/$FILENAME" -o"$DATA_DIR" -y
+                7z x "/tmp/$FILENAME" -o"$BIN_DIR" -y
             elif command -v 7zr &> /dev/null; then
-                7zr x "/tmp/$FILENAME" -o"$DATA_DIR" -y
+                7zr x "/tmp/$FILENAME" -o"$BIN_DIR" -y
             else
                 # Try to install p7zip-full
                 echo "Installing p7zip for extraction..."
                 sudo apt-get update && sudo apt-get install -y p7zip-full
-                7z x "/tmp/$FILENAME" -o"$DATA_DIR" -y
+                7z x "/tmp/$FILENAME" -o"$BIN_DIR" -y
             fi
             
             rm -f "/tmp/$FILENAME"
             
             # Verify extraction
-            TDB_FILE=$(ls "$DATA_DIR"/TDB_full_world_335*.sql 2>/dev/null | head -1)
+            TDB_FILE=$(ls "$BIN_DIR"/TDB_full_world_335*.sql 2>/dev/null | head -1)
             if [ -n "$TDB_FILE" ]; then
                 echo "TDB database downloaded and extracted: $(basename "$TDB_FILE")"
             else
-                echo "Warning: Extraction may have failed. Please check $DATA_DIR"
+                echo "Warning: Extraction may have failed. Please check $BIN_DIR"
             fi
         fi
     else
         echo "Skipping TDB download. Please download manually from:"
         echo "  https://github.com/TrinityCore/TrinityCore/releases"
-        echo "Extract the .sql file to: $DATA_DIR/"
+        echo "Extract the .sql file to: $BIN_DIR/"
     fi
 fi
 
@@ -181,13 +182,6 @@ sudo mysql characters < /home/trinitycore/TrinityCore/sql/base/characters_databa
 # Setup realmlist
 echo "Configuring realmlist..."
 sudo mysql auth -e "INSERT INTO realmlist (name, address, port, icon, flag, gamebuild) VALUES ('Trinity', '127.0.0.1', 8085, 0, 0, 12340) ON DUPLICATE KEY UPDATE address='127.0.0.1', port=8085;"
-
-# Copy TDB file if available
-TDB_FILE=$(ls /home/trinitycore/server/data/TDB_*.sql 2>/dev/null | head -1)
-if [ -n "$TDB_FILE" ]; then
-    echo "Copying TDB file: $(basename $TDB_FILE)"
-    cp "$TDB_FILE" /home/trinitycore/server/bin/
-fi
 
 # Extract maps if WoW client is mounted and not already extracted
 if [ -d /wotlk/Data ]; then
@@ -269,7 +263,7 @@ ACCOUNT_COUNT=$(sudo mysql -N -e "SELECT COUNT(*) FROM auth.account;" 2>/dev/nul
 
 if [ "$ACCOUNT_COUNT" = "0" ]; then
     echo "No accounts found. Creating default admin account..."
-    /home/trinitycore/scripts/create-account.sh admin admin --gm
+    /home/trinitycore/scripts/create-gm-account.sh admin admin --gm
     echo ""
     echo "Default admin account created!"
     echo "  Username: admin"
@@ -280,7 +274,7 @@ if [ "$ACCOUNT_COUNT" = "0" ]; then
 else
     echo "Accounts already exist ($ACCOUNT_COUNT found). Skipping default account creation."
     echo "To create additional accounts, use:"
-    echo "  ./scripts/create-account.sh <username> <password> [--gm]"
+    echo "  ./scripts/create-gm-account.sh <username> <password> [--gm]"
 fi
 
 echo ""

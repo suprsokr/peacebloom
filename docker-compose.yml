@@ -18,6 +18,8 @@ services:
       - ./tc-source:/home/trinitycore/TrinityCore
       # Mount scripts (editable without rebuilding image)
       - ./scripts:/home/trinitycore/scripts
+      # Mount Thorium source (for building from source if needed)
+      - ../thorium:/home/trinitycore/thorium
     ports:
       - "3306:3306"  # MySQL
       - "3724:3724"  # AuthServer

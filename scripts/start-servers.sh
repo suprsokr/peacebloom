@@ -19,26 +19,36 @@ if ! pgrep mysqld > /dev/null; then
 fi
 
 # Start authserver
-if pgrep -f authserver > /dev/null; then
+# Use setsid to properly detach from terminal and prevent signal issues
+if pgrep -x authserver > /dev/null 2>&1; then
     echo "Authserver already running"
 else
     echo "Starting authserver..."
-    nohup ./authserver > /tmp/authserver.log 2>&1 &
+    setsid ./authserver > /tmp/authserver.log 2>&1 &
     sleep 2
+    if pgrep -x authserver > /dev/null 2>&1; then
+        echo "Authserver started (PID: $(pgrep -x authserver))"
+    else
+        echo "Warning: Authserver may have failed to start. Check /tmp/authserver.log"
+    fi
 fi
 
 # Start worldserver
-if pgrep -f worldserver > /dev/null; then
+if pgrep -x worldserver > /dev/null 2>&1; then
     echo "Worldserver already running"
     echo "To access console: docker exec -it trinitycore bash"
     echo "Then: cd /home/trinitycore/server/bin && ./worldserver"
 else
     if [ "$BACKGROUND" = true ]; then
         echo "Starting worldserver in background..."
-        nohup ./worldserver > /tmp/worldserver.log 2>&1 &
-        sleep 3
-        echo "Worldserver started. Logs: tail -f /tmp/worldserver.log"
-        echo "To access console: docker exec -it trinitycore bash"
+        setsid ./worldserver > /tmp/worldserver.log 2>&1 &
+        sleep 5
+        if pgrep -x worldserver > /dev/null 2>&1; then
+            echo "Worldserver started (PID: $(pgrep -x worldserver))"
+            echo "Logs: tail -f /tmp/worldserver.log"
+        else
+            echo "Warning: Worldserver may have failed to start. Check /tmp/worldserver.log"
+        fi
     else
         echo "Starting worldserver..."
         echo ""

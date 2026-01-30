@@ -2,7 +2,19 @@
 
 ## Starting Servers
 
-### Quick Start
+### Quick Start (Interactive Console)
+
+The recommended way to run the worldserver is with an interactive console, which lets you run commands like creating accounts:
+
+```bash
+docker exec -it trinitycore bash -c "cd /home/trinitycore/server/bin && ./worldserver"
+```
+
+This gives you the `TC>` prompt where you can type server commands directly.
+
+### Using the Start Script
+
+Alternatively, use the convenience script:
 
 ```bash
 docker exec -it trinitycore ./scripts/start-servers.sh
@@ -95,31 +107,19 @@ docker-compose down
 
 ## Accounts
 
-### Default Admin Account
+### Creating Accounts (Recommended Method)
 
-Setup automatically creates a default admin account:
-- **Username:** `admin`
-- **Password:** `admin`
-- **GM Level:** 3 (Administrator)
+The most reliable way to create accounts is through the **worldserver console**. With worldserver running interactively, type:
 
-> ⚠️ **Change this password** after your first login:
-> ```bash
-> ./scripts/change-password.sh admin yournewpassword
-> ```
+```
+account create <username> <password>
+account set gmlevel <username> 3 -1
+```
 
-### Creating Additional Accounts
-
-Use the `create-account.sh` script (no server restart needed):
-
-```bash
-# Create a regular player account
-./scripts/create-account.sh myplayer mypassword
-
-# Create a GM account
-./scripts/create-account.sh mygm mypassword --gm
-
-# Create account with specific GM level (0-3)
-./scripts/create-account.sh mymod mypassword --gmlevel 1
+For example, to create an admin account:
+```
+account create admin admin
+account set gmlevel admin 3 -1
 ```
 
 GM Levels:
@@ -128,21 +128,30 @@ GM Levels:
 - `2` = GameMaster
 - `3` = Administrator
 
-### Changing Passwords
+> **Note:** The `-1` in the gmlevel command means "all realms".
+
+### Default Admin Account
+
+If setup completes successfully, it creates a default admin account:
+- **Username:** `admin`
+- **Password:** `admin`
+- **GM Level:** 3 (Administrator)
+
+> ⚠️ **Change this password** after your first login using the worldserver console:
+> ```
+> account set password admin <oldpassword> <newpassword>
+> ```
+
+### Alternative: Script-Based Account Creation
+
+You can also try the convenience scripts, though the worldserver console method above is more reliable:
 
 ```bash
-./scripts/change-password.sh <username> <new_password>
-```
+# Create a regular player account
+./scripts/create-gm-account.sh myplayer mypassword
 
-Changes take effect immediately—no server restart needed.
-
-### Using Worldserver Console
-
-You can also create accounts via the worldserver console:
-
-```
-account create <username> <password>
-account set gmlevel <username> 3 -1
+# Create a GM account
+./scripts/create-gm-account.sh mygm mypassword --gm
 ```
 
 ## Connecting to the Server
