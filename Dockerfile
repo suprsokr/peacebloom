@@ -6,17 +6,23 @@
 
 FROM suprsokr/peacebloom-base:24.04
 
-# Create trinitycore user with sudo
-RUN useradd -m -s /bin/bash trinitycore && \
-    echo "trinitycore ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
+# Add peacebloom user to sudoers (user already exists in base image)
+USER root
+RUN grep -q "peacebloom ALL=(ALL) NOPASSWD:ALL" /etc/sudoers 2>/dev/null || \
+    echo "peacebloom ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
 
-# Create directory structure
-USER trinitycore
-RUN mkdir -p /home/trinitycore/server/etc \
-    /home/trinitycore/server/bin \
-    /home/trinitycore/server/data
+# Create directory structure and symlinks for convenience
+USER root
+RUN mkdir -p /home/peacebloom/server/etc \
+    /home/peacebloom/server/bin && \
+    chown -R peacebloom:peacebloom /home/peacebloom/server && \
+    ln -s /home/peacebloom/mods /mods
 
-WORKDIR /home/trinitycore
+USER peacebloom
+WORKDIR /home/peacebloom
+
+# Add scripts to PATH for easy access via docker exec
+ENV PATH="/home/peacebloom/scripts:${PATH}"
 
 # Download Thorium CLI from GitHub releases
 # Detect architecture and download appropriate binary

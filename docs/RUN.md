@@ -7,7 +7,7 @@
 The recommended way to run the worldserver is with an interactive console, which lets you run commands like creating accounts:
 
 ```bash
-docker exec -it trinitycore bash -c "cd /home/trinitycore/server/bin && ./worldserver"
+docker exec -it peacebloom bash -c "cd /home/peacebloom/server/bin && ./worldserver"
 ```
 
 This gives you the `TC>` prompt where you can type server commands directly.
@@ -17,7 +17,7 @@ This gives you the `TC>` prompt where you can type server commands directly.
 Alternatively, use the convenience script:
 
 ```bash
-docker exec -it trinitycore ./scripts/start-servers.sh
+docker exec -it peacebloom start
 ```
 
 This will:
@@ -30,7 +30,7 @@ This will:
 To run worldserver in the background:
 
 ```bash
-./scripts/start-servers.sh --background
+start --background
 ```
 
 Logs will be written to:
@@ -53,14 +53,14 @@ sudo service mysql start
 ### Start AuthServer
 
 ```bash
-cd /home/trinitycore/server/bin
+cd /home/peacebloom/server/bin
 ./authserver &
 ```
 
 ### Start WorldServer
 
 ```bash
-cd /home/trinitycore/server/bin
+cd /home/peacebloom/server/bin
 ./worldserver
 ```
 
@@ -69,8 +69,8 @@ cd /home/trinitycore/server/bin
 ### Quick Stop
 
 ```bash
-./scripts/stop-servers.sh           # Stop auth + world servers
-./scripts/stop-servers.sh --all     # Stop everything including MySQL
+stop           # Stop auth + world servers
+stop --all     # Stop everything including MySQL
 ```
 
 Options:
@@ -148,10 +148,10 @@ You can also try the convenience scripts, though the worldserver console method 
 
 ```bash
 # Create a regular player account
-./scripts/create-gm-account.sh myplayer mypassword
+create-gm-account myplayer mypassword
 
 # Create a GM account
-./scripts/create-gm-account.sh mygm mypassword --gm
+create-gm-account mygm mypassword --gm
 ```
 
 ## Connecting to the Server

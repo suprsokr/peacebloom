@@ -7,7 +7,7 @@ if [ "$1" == "--background" ]; then
     BACKGROUND=true
 fi
 
-cd /home/trinitycore/server/bin
+cd /home/peacebloom/server/bin
 
 echo "=== Starting TrinityCore Servers ==="
 
@@ -36,8 +36,8 @@ fi
 # Start worldserver
 if pgrep -x worldserver > /dev/null 2>&1; then
     echo "Worldserver already running"
-    echo "To access console: docker exec -it trinitycore bash"
-    echo "Then: cd /home/trinitycore/server/bin && ./worldserver"
+    echo "To access console: docker exec -it peacebloom bash"
+    echo "Then: cd /home/peacebloom/server/bin && ./worldserver"
 else
     if [ "$BACKGROUND" = true ]; then
         echo "Starting worldserver in background..."
@@ -57,7 +57,7 @@ else
         echo "  account create <username> <password>"
         echo "  account set gmlevel <username> 3 -1"
         echo ""
-        echo "To run in background instead, use: start-servers.sh --background"
+        echo "To run in background instead, use: start --background"
         echo ""
         ./worldserver
     fi

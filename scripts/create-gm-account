@@ -5,8 +5,8 @@
 # 1. Bootstrap mode (no existing accounts): Creates account directly in database using SRP6
 # 2. SOAP mode (existing GM account): Uses SOAP API for account creation
 #
-# Usage: ./create-gm-account.sh <username> <password> [--gm]
-#        ./create-gm-account.sh <username> <password> --gmlevel <0-3>
+# Usage: create-gm-account <username> <password> [--gm]
+#        create-gm-account <username> <password> --gmlevel <0-3>
 #
 # GM Levels:
 #   0 = Player (default)
@@ -141,7 +141,7 @@ ACCOUNT_ID=$(mysql -utrinity -ptrinity -N -e "SELECT id FROM auth.account WHERE 
 if [ "$GMLEVEL" -gt 0 ]; then
     mysql -utrinity -ptrinity auth 2>/dev/null << EOF
 INSERT INTO account_access (AccountID, SecurityLevel, RealmID, Comment)
-VALUES ($ACCOUNT_ID, $GMLEVEL, -1, 'Created by create-gm-account.sh');
+VALUES ($ACCOUNT_ID, $GMLEVEL, -1, 'Created by create-gm-account');
 EOF
     echo "Account created with GM level $GMLEVEL"
 else

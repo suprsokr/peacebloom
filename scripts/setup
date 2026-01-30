@@ -1,7 +1,7 @@
 #!/bin/bash
 # TrinityCore + Thorium setup script - run this inside the container
 #
-# Usage: ./setup.sh [-y]
+# Usage: setup [-y]
 #   -y    Non-interactive mode (auto-accept all prompts)
 
 set -e
@@ -32,7 +32,7 @@ echo "=== TrinityCore 3.3.5 + Thorium Setup ==="
 # =============================================================================
 # Step 1: Check/Clone TrinityCore Source
 # =============================================================================
-TC_DIR="/home/trinitycore/TrinityCore"
+TC_DIR="/home/peacebloom/TrinityCore"
 
 if [ ! -f "$TC_DIR/CMakeLists.txt" ]; then
     echo ""
@@ -58,7 +58,7 @@ fi
 # Step 2: Check/Download TDB Database
 # =============================================================================
 # TDB file must be in the bin directory where worldserver runs
-BIN_DIR="/home/trinitycore/server/bin"
+BIN_DIR="/home/peacebloom/server/bin"
 TDB_FILE=$(ls "$BIN_DIR"/TDB_full_world_335*.sql 2>/dev/null | head -1)
 
 if [ -z "$TDB_FILE" ]; then
@@ -122,14 +122,14 @@ fi
 # =============================================================================
 # Step 3: Build TrinityCore (if needed)
 # =============================================================================
-if [ ! -f /home/trinitycore/server/bin/worldserver ]; then
+if [ ! -f /home/peacebloom/server/bin/worldserver ]; then
     echo ""
     echo "TrinityCore binaries not found!"
     echo ""
     if prompt_yes_no "Build TrinityCore now?"; then
-        /home/trinitycore/scripts/build-tc.sh
+        build-tc
     else
-        echo "Skipping build. You can run ./scripts/build-tc.sh later."
+        echo "Skipping build. You can run build-tc later."
         exit 1
     fi
 fi
@@ -188,8 +188,8 @@ sudo mysql -e "GRANT ALL PRIVILEGES ON auth.* TO 'trinity'@'localhost' WITH GRAN
 
 # Import base database schemas
 echo "Importing base database schemas..."
-sudo mysql auth < /home/trinitycore/TrinityCore/sql/base/auth_database.sql
-sudo mysql characters < /home/trinitycore/TrinityCore/sql/base/characters_database.sql
+sudo mysql auth < /home/peacebloom/TrinityCore/sql/base/auth_database.sql
+sudo mysql characters < /home/peacebloom/TrinityCore/sql/base/characters_database.sql
 
 # Setup realmlist
 echo "Configuring realmlist..."
@@ -197,7 +197,7 @@ sudo mysql auth -e "INSERT INTO realmlist (name, address, port, icon, flag, game
 
 # Extract maps if WoW client is mounted and not already extracted
 if [ -d /wotlk/Data ]; then
-    cd /home/trinitycore/server/bin
+    cd /home/peacebloom/server/bin
     
     if [ ! -d "maps" ] || [ -z "$(ls -A maps 2>/dev/null)" ]; then
         echo "Extracting game data from WoW client..."
@@ -225,23 +225,33 @@ fi
 echo ""
 echo "=== Setting up Thorium Modding Framework ==="
 
-if [ -d /home/trinitycore/thorium ]; then
+if [ -d /home/peacebloom/thorium ]; then
     # Build Thorium CLI if not already built
     if ! command -v thorium &> /dev/null; then
         echo "Building Thorium CLI..."
-        /home/trinitycore/scripts/build-thorium.sh
+        build-thorium
     else
         echo "Thorium CLI already installed: $(thorium version)"
     fi
     
     # Initialize Thorium workspace in mods directory if not already done
-    if [ ! -f /home/trinitycore/mods/config.json ]; then
-        echo "Initializing Thorium workspace in /home/trinitycore/mods..."
-        cd /home/trinitycore/mods
+    if [ ! -f /home/peacebloom/mods/config.json ]; then
+        echo "Initializing Thorium workspace in /home/peacebloom/mods..."
+        cd /home/peacebloom/mods
         thorium init
         echo "Thorium workspace initialized!"
     else
         echo "Thorium workspace already initialized."
+    fi
+    
+    # Extract DBCs from WoW client if not already done
+    if [ -d /wotlk/Data ] && [ ! -d /home/peacebloom/mods/dbc ]; then
+        echo "Extracting DBCs from WoW client..."
+        cd /home/peacebloom/mods
+        thorium extract --dbc
+        echo "DBC extraction complete!"
+    elif [ -d /home/peacebloom/mods/dbc ]; then
+        echo "DBCs already extracted."
     fi
     
     # Create DBC database for Thorium
@@ -270,7 +280,7 @@ if [ -d /home/trinitycore/thorium ]; then
     
     echo "Thorium setup complete!"
 else
-    echo "Note: Thorium source not found at /home/trinitycore/thorium"
+    echo "Note: Thorium source not found at /home/peacebloom/thorium"
     echo "The thorium/ directory should be mounted via docker-compose.yml"
 fi
 
@@ -285,31 +295,32 @@ ACCOUNT_COUNT=$(sudo mysql -N -e "SELECT COUNT(*) FROM auth.account;" 2>/dev/nul
 
 if [ "$ACCOUNT_COUNT" = "0" ]; then
     echo "No accounts found. Creating default admin account..."
-    /home/trinitycore/scripts/create-gm-account.sh admin admin --gm
+    create-gm-account admin admin --gm
     echo ""
     echo "Default admin account created!"
     echo "  Username: admin"
     echo "  Password: admin"
     echo "  GM Level: 3 (Administrator)"
     echo ""
-    echo "IMPORTANT: Change this password after first login!"
+    echo "IMPORTANT: Change this password!"
+    echo "  docker exec -it peacebloom change-password admin <new_password>"
 else
     echo "Accounts already exist ($ACCOUNT_COUNT found). Skipping default account creation."
     echo "To create additional accounts, use:"
-    echo "  ./scripts/create-gm-account.sh <username> <password> [--gm]"
+    echo "  create-gm-account <username> <password> [--gm]"
 fi
 
 echo ""
 echo "=== Setup Complete ==="
 echo ""
 echo "To start the servers:"
-echo "  docker exec -it trinitycore ./scripts/start-servers.sh"
+echo "  docker exec -it peacebloom start"
 echo ""
 echo "To enter an interactive bash session:"
-echo "  docker exec -it trinitycore bash"
+echo "  docker exec -it peacebloom bash"
 echo ""
 echo "For Thorium modding:"
-echo "  docker exec -it trinitycore bash"
-echo "  cd /home/trinitycore/mods"
+echo "  docker exec -it peacebloom bash"
+echo "  cd /mods"
 echo "  thorium help"
 echo ""

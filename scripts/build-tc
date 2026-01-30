@@ -6,11 +6,11 @@ set -e
 
 echo "=== Building TrinityCore 3.3.5 ==="
 
-cd /home/trinitycore/TrinityCore
+cd /home/peacebloom/TrinityCore
 
 # Check if source exists
 if [ ! -f "CMakeLists.txt" ]; then
-    echo "Error: TrinityCore source not found at /home/trinitycore/TrinityCore/"
+    echo "Error: TrinityCore source not found at /home/peacebloom/TrinityCore/"
     echo "Make sure tc-source is mounted and contains the TrinityCore source"
     exit 1
 fi
@@ -32,7 +32,7 @@ cmake ../ \
     -DTOOLS=1 \
     -DSERVERS=1 \
     -DSCRIPTS=minimal-dynamic \
-    -DCMAKE_INSTALL_PREFIX=/home/trinitycore/server
+    -DCMAKE_INSTALL_PREFIX=/home/peacebloom/server
 
 # Build
 echo "Building TrinityCore..."
@@ -43,15 +43,15 @@ echo "Installing TrinityCore..."
 make install
 
 # Copy config files if they don't exist
-if [ ! -f /home/trinitycore/server/etc/worldserver.conf ]; then
-    cp /home/trinitycore/server/etc/worldserver.conf.dist /home/trinitycore/server/etc/worldserver.conf
+if [ ! -f /home/peacebloom/server/etc/worldserver.conf ]; then
+    cp /home/peacebloom/server/etc/worldserver.conf.dist /home/peacebloom/server/etc/worldserver.conf
 fi
 
-if [ ! -f /home/trinitycore/server/etc/authserver.conf ]; then
-    cp /home/trinitycore/server/etc/authserver.conf.dist /home/trinitycore/server/etc/authserver.conf
+if [ ! -f /home/peacebloom/server/etc/authserver.conf ]; then
+    cp /home/peacebloom/server/etc/authserver.conf.dist /home/peacebloom/server/etc/authserver.conf
 fi
 
 echo ""
 echo "=== Build Complete ==="
-echo "Binaries installed to: /home/trinitycore/server/bin/"
-echo "Configs at: /home/trinitycore/server/etc/"
+echo "Binaries installed to: /home/peacebloom/server/bin/"
+echo "Configs at: /home/peacebloom/server/etc/"

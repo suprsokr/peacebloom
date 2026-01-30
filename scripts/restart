@@ -2,11 +2,11 @@
 # Restart TrinityCore servers
 # Useful after running `thorium build` to reload changes
 #
-# Usage: ./restart-servers.sh [--world-only] [--auth-only]
+# Usage: restart [--world-only] [--auth-only]
 
 set -e
 
-cd /home/trinitycore/server/bin
+cd /home/peacebloom/server/bin
 
 RESTART_WORLD=true
 RESTART_AUTH=true

@@ -10,8 +10,8 @@ A batteries-included Docker environment for WoW Trinity Core 3.3.5 server develo
 cp .env.example .env           # Copy environment template
 # Edit .env and set WOTLK_PATH to your WoW 3.3.5 client directory
 docker-compose up -d           # Build and start container
-docker exec -it trinitycore ./scripts/setup.sh   # Automated setup
-docker exec -it trinitycore ./scripts/start-servers.sh
+docker exec -it peacebloom setup   # Automated setup
+docker exec -it peacebloom start   # Start servers
 ```
 
 That's it. Login as admin/admin to your dev Trinity Core 3.3.5 server.
@@ -19,13 +19,13 @@ That's it. Login as admin/admin to your dev Trinity Core 3.3.5 server.
 ## Modding in 30 Seconds
 
 ```bash
-docker exec -it trinitycore bash
-cd /home/trinitycore/mods
+docker exec -it peacebloom bash
+cd mods
 
-thorium create-mod my-mod                        # Create a mod
-thorium create-migration --mod my-mod add_item   # Add a migration
+thorium create-mod my-mod   # Create a mod
+thorium create-migration --mod my-mod adding_an_item   # Add a migration
 # Edit SQL files...
-thorium build && ../scripts/restart-servers.sh   # Build and restart
+thorium build && restart   # Build and restart
 ```
 
 Your changes are now live. Restart your WoW client, login with admin/admin and connect to the server. Server DBCs updated, client MPQ patched, servers restarted.

@@ -15,20 +15,19 @@ Complete guide for setting up Peacebloom - the TrinityCore + Thorium modding pla
 # 1. Copy environment file and configure your WoW client path
 cp .env.example .env
 # Edit .env and set WOTLK_PATH to your WoW 3.3.5 client directory
-# Docker does not support symlinks.
 
 # 2. Build and start Docker
 docker-compose build
 docker-compose up -d
 
 # 3. Run automated setup (clones source, downloads TDB, builds, configures)
-docker exec -it trinitycore ./scripts/setup.sh
+docker exec -it peacebloom setup
 
 # 4. Start servers
-docker exec -it trinitycore ./scripts/start-servers.sh
+docker exec -it peacebloom start
 ```
 
-The `setup.sh` script will automatically:
+The `setup` script will automatically:
 - Clone TrinityCore 3.3.5 source (if not present)
 - Download the latest TDB world database (if not present)
 - Build TrinityCore binaries
@@ -39,7 +38,7 @@ The `setup.sh` script will automatically:
 
 For fully non-interactive setup (auto-accepts all prompts):
 ```bash
-docker exec -it trinitycore ./scripts/setup.sh -y
+docker exec -it peacebloom setup -y
 ```
 
 ---
@@ -50,7 +49,7 @@ If you prefer more control, follow these detailed steps.
 
 ### 1. Clone TrinityCore Source (Optional)
 
-You can clone manually or let `setup.sh` do it automatically:
+You can clone manually or let `setup` do it automatically:
 
 ```bash
 git clone -b 3.3.5 https://github.com/TrinityCore/TrinityCore.git tc-source
@@ -109,19 +108,19 @@ docker-compose up -d
 ### 4. Build TrinityCore
 
 ```bash
-docker exec -it trinitycore ./scripts/build-tc.sh
+docker exec -it peacebloom build-tc
 ```
 
 This takes 10-30 minutes depending on your hardware. It will:
 - Configure CMake with debug flags
 - Compile TrinityCore binaries
-- Install to `/home/trinitycore/server/bin/`
+- Install to `/home/peacebloom/server/bin/`
 - Copy default configuration files
 
 ### 5. Run Setup
 
 ```bash
-docker exec -it trinitycore ./scripts/setup.sh
+docker exec -it peacebloom setup
 ```
 
 This will:
@@ -137,7 +136,7 @@ This will:
 ### 6. Start Servers
 
 ```bash
-docker exec -it trinitycore ./scripts/start-servers.sh
+docker exec -it peacebloom start
 ```
 
 This starts:
@@ -150,11 +149,9 @@ See [RUN.md](RUN.md) for more server management options.
 ## Directory Structure
 
 ```
-├── tc-source/           # TrinityCore source
-├── thorium/             # Thorium CLI source
+├── tc-source/           # TrinityCore source (cloned by setup)
 ├── mods/                # Thorium workspace
-├── data/                # TDB database files (you provide)
-├── wotlk/               # WoW client (configure path in .env)
+├── scripts/             # Container scripts
 ├── Dockerfile           # Container definition
 ├── docker-compose.yml   # Docker services
 └── docs/                # Documentation
@@ -162,15 +159,14 @@ See [RUN.md](RUN.md) for more server management options.
 
 ## Docker Volumes
 
-| Volume | Container Path | Purpose |
-|--------|----------------|---------|
-| `trinitycore_server` | `/home/trinitycore/server` | Binaries, configs, maps |
+| Volume/Mount | Container Path | Purpose |
+|--------------|----------------|---------|
+| `server` | `/home/peacebloom/server` | Binaries, configs, maps, TDB |
 | `mysql_data` | `/var/lib/mysql` | MySQL database files |
-| `./data` | `/home/trinitycore/server/data` | TDB files |
-| `./thorium` | `/home/trinitycore/thorium` | Thorium source |
-| `./mods` | `/home/trinitycore/mods` | Thorium workspace |
-| `./tc-source` | `/home/trinitycore/TrinityCore` | TC source |
-| `${WOTLK_PATH}` | `/wotlk` | WoW 335 client |
+| `./mods` | `/home/peacebloom/mods` | Thorium workspace |
+| `./tc-source` | `/home/peacebloom/TrinityCore` | TC source |
+| `./scripts` | `/home/peacebloom/scripts` | Container scripts |
+| `${WOTLK_PATH}` | `/wotlk` | WoW 3.3.5 client |
 
 ## Database Access
 
@@ -197,16 +193,13 @@ After setup, Thorium is ready to use:
 
 ```bash
 # Enter container
-docker exec -it trinitycore bash
+docker exec -it peacebloom bash
 
 # Go to mods workspace
-cd /home/trinitycore/mods
+cd /mods
 
 # Check Thorium is installed
 thorium version
-
-# Extract DBCs from client (first time)
-thorium extract --dbc
 
 # Create your first mod
 thorium create-mod my-first-mod

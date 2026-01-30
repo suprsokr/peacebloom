@@ -6,7 +6,7 @@ set -e
 
 echo "=== Building Thorium Modding CLI ==="
 
-THORIUM_DIR="/home/trinitycore/thorium"
+THORIUM_DIR="/home/peacebloom/thorium"
 
 # Check if Thorium source exists
 if [ ! -f "$THORIUM_DIR/Makefile" ]; then

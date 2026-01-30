@@ -1,25 +1,25 @@
 services:
-  trinitycore:
+  peacebloom:
     build: .
     image: suprsokr/peacebloom-base:24.04
-    container_name: trinitycore
+    container_name: peacebloom
     command: /bin/bash -c "tail -f /dev/null"
     volumes:
       # Persist compiled binaries, configs, and extracted maps
-      - trinitycore_server:/home/trinitycore/server
+      - server:/home/peacebloom/server
       # Persist MySQL data
       - mysql_data:/var/lib/mysql
       # Mount WoW 3.3.5 client (required for map extraction and MPQ patching)
       # Configure WOTLK_PATH in your .env file
       - ${WOTLK_PATH}:/wotlk:rw
       # Mount mods workspace (edit with your IDE)
-      - ./mods:/home/trinitycore/mods
-      # Mount TrinityCore source (edit with your IDE, cloned by setup.sh)
-      - ./tc-source:/home/trinitycore/TrinityCore
+      - ./mods:/home/peacebloom/mods
+      # Mount TrinityCore source (edit with your IDE, cloned by setup)
+      - ./tc-source:/home/peacebloom/TrinityCore
       # Mount scripts (editable without rebuilding image)
-      - ./scripts:/home/trinitycore/scripts
+      - ./scripts:/home/peacebloom/scripts
       # Mount Thorium source (for building from source if needed)
-      - ../thorium:/home/trinitycore/thorium
+      - ../thorium:/home/peacebloom/thorium
     ports:
       - "3306:3306"  # MySQL
       - "3724:3724"  # AuthServer
@@ -29,5 +29,5 @@ services:
     privileged: true
 
 volumes:
-  trinitycore_server:
+  server:
   mysql_data:

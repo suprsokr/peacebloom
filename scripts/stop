@@ -1,7 +1,7 @@
 #!/bin/bash
 # Stop TrinityCore servers
 #
-# Usage: ./stop-servers.sh [--world-only] [--auth-only] [--mysql]
+# Usage: stop [--world-only] [--auth-only] [--mysql]
 
 set -e
 
