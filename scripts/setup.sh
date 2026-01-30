@@ -149,6 +149,9 @@ fi
 # Start MySQL
 echo "Starting MySQL..."
 sudo chown -R mysql:mysql /var/lib/mysql
+# Fix mysql user home directory to prevent "cannot change directory to /nonexistent" warning
+sudo mkdir -p /nonexistent
+sudo chown mysql:mysql /nonexistent
 sudo service mysql stop 2>/dev/null || true
 sudo service mysql start
 sleep 8
