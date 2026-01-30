@@ -1,7 +1,7 @@
 services:
   trinitycore:
     build: .
-    image: peacebloom:3.3.5
+    image: suprsokr/peacebloom-base:24.04
     container_name: trinitycore
     command: /bin/bash -c "tail -f /dev/null"
     volumes:
