@@ -1,51 +1,14 @@
 # Peacebloom: TrinityCore 3.3.5 + Thorium Modding Platform
-# Ubuntu 24.04 LTS with MySQL 8, supports ARM64 and AMD64
+# Uses pre-built base image with Ubuntu 24.04 LTS, MySQL 8, and build dependencies
+# Supports ARM64 and AMD64
+#
+# To rebuild base image: see Dockerfile.base
 
-FROM ubuntu:24.04
-
-ENV DEBIAN_FRONTEND=noninteractive
-
-# Install build dependencies and MySQL
-RUN apt-get update && \
-    apt-get install -y \
-    # Build essentials
-    git \
-    curl \
-    clang \
-    cmake \
-    make \
-    gcc \
-    g++ \
-    # TrinityCore dependencies
-    libssl-dev \
-    libbz2-dev \
-    libreadline-dev \
-    libncurses-dev \
-    libboost-all-dev \
-    # MySQL 8
-    mysql-server \
-    mysql-client \
-    libmysqlclient-dev \
-    # For TDB extraction
-    p7zip-full \
-    # Utilities
-    sudo \
-    vim \
-    less \
-    && rm -rf /var/lib/apt/lists/*
-
-# Set clang as default compiler (better for TrinityCore on ARM64)
-RUN update-alternatives --install /usr/bin/cc cc /usr/bin/clang 100 && \
-    update-alternatives --install /usr/bin/c++ c++ /usr/bin/clang++ 100
+FROM suprsokr/peacebloom-base:24.04
 
 # Create trinitycore user with sudo
 RUN useradd -m -s /bin/bash trinitycore && \
     echo "trinitycore ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
-
-# Setup MySQL directories
-RUN mkdir -p /var/run/mysqld && \
-    chown mysql:mysql /var/run/mysqld && \
-    chmod 755 /var/run/mysqld
 
 # Create directory structure
 USER trinitycore

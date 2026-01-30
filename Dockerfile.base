@@ -1,0 +1,49 @@
+# Peacebloom Base Image: Ubuntu 24.04 with TrinityCore dependencies
+# Build and push this once to Docker Hub to speed up user builds
+#
+# Build:   docker build -f Dockerfile.base -t suprsokr/peacebloom-base:24.04 .
+# Push:    docker push suprsokr/peacebloom-base:24.04
+#
+# Supports ARM64 and AMD64
+
+FROM ubuntu:24.04
+
+ENV DEBIAN_FRONTEND=noninteractive
+
+# Install build dependencies and MySQL
+RUN apt-get update && \
+    apt-get install -y \
+    # Build essentials
+    git \
+    curl \
+    clang \
+    cmake \
+    make \
+    gcc \
+    g++ \
+    # TrinityCore dependencies
+    libssl-dev \
+    libbz2-dev \
+    libreadline-dev \
+    libncurses-dev \
+    libboost-all-dev \
+    # MySQL 8
+    mysql-server \
+    mysql-client \
+    libmysqlclient-dev \
+    # For TDB extraction
+    p7zip-full \
+    # Utilities
+    sudo \
+    vim \
+    less \
+    && rm -rf /var/lib/apt/lists/*
+
+# Set clang as default compiler
+RUN update-alternatives --install /usr/bin/cc cc /usr/bin/clang 100 && \
+    update-alternatives --install /usr/bin/c++ c++ /usr/bin/clang++ 100
+
+# Setup MySQL directories
+RUN mkdir -p /var/run/mysqld && \
+    chown mysql:mysql /var/run/mysqld && \
+    chmod 755 /var/run/mysqld
