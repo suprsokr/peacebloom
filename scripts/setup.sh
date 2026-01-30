@@ -70,11 +70,12 @@ if [ -z "$TDB_FILE" ]; then
         echo "Fetching latest TDB release info from GitHub..."
         
         # Get the latest release info for TrinityCore 3.3.5 branch
+        # Note: TDB files are named like TDB_full_world_335.25101_2025_10_21.7z (no .sql before .7z)
         RELEASE_INFO=$(curl -s "https://api.github.com/repos/TrinityCore/TrinityCore/releases" | \
-            grep -E '"tag_name"|"browser_download_url".*TDB_full_world_335.*\.sql\.7z' | head -4)
+            grep -E '"browser_download_url".*TDB_full_world_335.*\.7z' | head -1)
         
         # Extract download URL for TDB file
-        DOWNLOAD_URL=$(echo "$RELEASE_INFO" | grep "browser_download_url" | head -1 | sed 's/.*"\(https[^"]*\)".*/\1/')
+        DOWNLOAD_URL=$(echo "$RELEASE_INFO" | sed 's/.*"\(https[^"]*\)".*/\1/')
         
         if [ -z "$DOWNLOAD_URL" ]; then
             echo "Could not find TDB download URL from GitHub releases."
@@ -172,7 +173,15 @@ fi
 
 # Create TrinityCore databases
 echo "Creating TrinityCore databases..."
-sudo mysql < /home/trinitycore/TrinityCore/sql/create/create_mysql.sql
+# The TrinityCore create_mysql.sql uses CREATE USER without IF NOT EXISTS,
+# so we handle the case where databases/user already exist
+sudo mysql -e "CREATE USER IF NOT EXISTS 'trinity'@'localhost' IDENTIFIED BY 'trinity';"
+sudo mysql -e "CREATE DATABASE IF NOT EXISTS world DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
+sudo mysql -e "CREATE DATABASE IF NOT EXISTS characters DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
+sudo mysql -e "CREATE DATABASE IF NOT EXISTS auth DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
+sudo mysql -e "GRANT ALL PRIVILEGES ON world.* TO 'trinity'@'localhost' WITH GRANT OPTION;"
+sudo mysql -e "GRANT ALL PRIVILEGES ON characters.* TO 'trinity'@'localhost' WITH GRANT OPTION;"
+sudo mysql -e "GRANT ALL PRIVILEGES ON auth.* TO 'trinity'@'localhost' WITH GRANT OPTION;"
 
 # Import base database schemas
 echo "Importing base database schemas..."
@@ -220,6 +229,16 @@ if [ -d /home/trinitycore/thorium ]; then
         /home/trinitycore/scripts/build-thorium.sh
     else
         echo "Thorium CLI already installed: $(thorium version)"
+    fi
+    
+    # Initialize Thorium workspace in mods directory if not already done
+    if [ ! -f /home/trinitycore/mods/config.json ]; then
+        echo "Initializing Thorium workspace in /home/trinitycore/mods..."
+        cd /home/trinitycore/mods
+        thorium init
+        echo "Thorium workspace initialized!"
+    else
+        echo "Thorium workspace already initialized."
     fi
     
     # Create DBC database for Thorium
@@ -281,14 +300,13 @@ echo ""
 echo "=== Setup Complete ==="
 echo ""
 echo "To start the servers:"
-echo "  ./scripts/start-servers.sh"
+echo "  docker exec -it trinitycore ./scripts/start-servers.sh"
 echo ""
-echo "Or manually:"
-echo "  cd /home/trinitycore/server/bin"
-echo "  ./authserver &"
-echo "  ./worldserver"
+echo "To enter an interactive bash session:"
+echo "  docker exec -it trinitycore bash"
 echo ""
 echo "For Thorium modding:"
+echo "  docker exec -it trinitycore bash"
 echo "  cd /home/trinitycore/mods"
 echo "  thorium help"
 echo ""

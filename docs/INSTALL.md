@@ -15,6 +15,7 @@ Complete guide for setting up Peacebloom - the TrinityCore + Thorium modding pla
 # 1. Copy environment file and configure your WoW client path
 cp .env.example .env
 # Edit .env and set WOTLK_PATH to your WoW 3.3.5 client directory
+# Docker does not support symlinks.
 
 # 2. Build and start Docker
 docker-compose build

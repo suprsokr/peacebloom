@@ -7,13 +7,14 @@ A batteries-included Docker environment for WoW Trinity Core 3.3.5 server develo
 ## Quick Start
 
 ```bash
-cp .env.example .env           # Configure your WoW client path
-docker-compose up -d           # Start container
+cp .env.example .env           # Copy environment template
+# Edit .env and set WOTLK_PATH to your WoW 3.3.5 client directory
+docker-compose up -d           # Build and start container
 docker exec -it trinitycore ./scripts/setup.sh   # Automated setup
 docker exec -it trinitycore ./scripts/start-servers.sh
 ```
 
-That's it.
+That's it. Login as admin/admin to your dev Trinity Core 3.3.5 server.
 
 ## Modding in 30 Seconds
 
