@@ -1,0 +1,57 @@
+#!/bin/bash
+# Build TrinityCore from source
+# Run this inside the container after mounting tc-source
+
+set -e
+
+echo "=== Building TrinityCore 3.3.5 ==="
+
+cd /home/trinitycore/TrinityCore
+
+# Check if source exists
+if [ ! -f "CMakeLists.txt" ]; then
+    echo "Error: TrinityCore source not found at /home/trinitycore/TrinityCore/"
+    echo "Make sure tc-source is mounted and contains the TrinityCore source"
+    exit 1
+fi
+
+# Create build directory
+if [ ! -d "build" ]; then
+    mkdir build
+fi
+
+cd build
+
+# Configure CMake with debug/development flags
+echo "Configuring CMake..."
+cmake ../ \
+    -DCMAKE_BUILD_TYPE=Debug \
+    -DWITH_WARNINGS=0 \
+    -DUSE_SCRIPTPCH=0 \
+    -DUSE_COREPCH=0 \
+    -DTOOLS=1 \
+    -DSERVERS=1 \
+    -DSCRIPTS=minimal-dynamic \
+    -DCMAKE_INSTALL_PREFIX=/home/trinitycore/server
+
+# Build
+echo "Building TrinityCore..."
+make -j$(nproc)
+
+# Install
+echo "Installing TrinityCore..."
+make install
+
+# Copy config files if they don't exist
+if [ ! -f /home/trinitycore/server/etc/worldserver.conf ]; then
+    cp /home/trinitycore/server/etc/worldserver.conf.dist /home/trinitycore/server/etc/worldserver.conf
+fi
+
+if [ ! -f /home/trinitycore/server/etc/authserver.conf ]; then
+    cp /home/trinitycore/server/etc/authserver.conf.dist /home/trinitycore/server/etc/authserver.conf
+fi
+
+echo ""
+echo "=== Build Complete ==="
+echo "Binaries installed to: /home/trinitycore/server/bin/"
+echo "Configs at: /home/trinitycore/server/etc/"

@@ -1,0 +1,21 @@
+# Environment (user-specific)
+.env
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE/Editor
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# TrinityCore source (cloned during setup)
+tc-source/
+
+# Mods workspace (created/populated by thorium commands)
+mods/
+
+# Large files
+*.7z

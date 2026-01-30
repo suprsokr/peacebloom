@@ -1,0 +1,31 @@
+services:
+  trinitycore:
+    build: .
+    image: peacebloom:3.3.5
+    container_name: trinitycore
+    command: /bin/bash -c "tail -f /dev/null"
+    volumes:
+      # Persist compiled binaries, configs, and extracted maps
+      - trinitycore_server:/home/trinitycore/server
+      # Persist MySQL data
+      - mysql_data:/var/lib/mysql
+      # Mount WoW 3.3.5 client (required for map extraction and MPQ patching)
+      # Configure WOTLK_PATH in your .env file
+      - ${WOTLK_PATH}:/wotlk:rw
+      # Mount mods workspace (edit with your IDE)
+      - ./mods:/home/trinitycore/mods
+      # Mount TrinityCore source (edit with your IDE, cloned by setup.sh)
+      - ./tc-source:/home/trinitycore/TrinityCore
+      # Mount scripts (editable without rebuilding image)
+      - ./scripts:/home/trinitycore/scripts
+    ports:
+      - "3306:3306"  # MySQL
+      - "3724:3724"  # AuthServer
+      - "8085:8085"  # WorldServer
+    stdin_open: true
+    tty: true
+    privileged: true
+
+volumes:
+  trinitycore_server:
+  mysql_data:

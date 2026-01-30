@@ -1,0 +1,81 @@
+#!/bin/bash
+# Stop TrinityCore servers
+#
+# Usage: ./stop-servers.sh [--world-only] [--auth-only] [--mysql]
+
+set -e
+
+STOP_WORLD=true
+STOP_AUTH=true
+STOP_MYSQL=false
+
+# Parse arguments
+while [[ $# -gt 0 ]]; do
+    case $1 in
+        --world-only)
+            STOP_AUTH=false
+            shift
+            ;;
+        --auth-only)
+            STOP_WORLD=false
+            shift
+            ;;
+        --mysql)
+            STOP_MYSQL=true
+            shift
+            ;;
+        --all)
+            STOP_MYSQL=true
+            shift
+            ;;
+        *)
+            echo "Unknown option: $1"
+            echo "Usage: $0 [--world-only] [--auth-only] [--mysql] [--all]"
+            exit 1
+            ;;
+    esac
+done
+
+echo "=== Stopping TrinityCore Servers ==="
+
+# Stop worldserver
+if [ "$STOP_WORLD" = true ]; then
+    if pgrep -f worldserver > /dev/null; then
+        echo "Stopping worldserver..."
+        pkill -f worldserver || true
+        sleep 2
+        if pgrep -f worldserver > /dev/null; then
+            echo "Worldserver still running, forcing kill..."
+            pkill -9 -f worldserver || true
+        fi
+        echo "Worldserver stopped"
+    else
+        echo "Worldserver not running"
+    fi
+fi
+
+# Stop authserver
+if [ "$STOP_AUTH" = true ]; then
+    if pgrep -f authserver > /dev/null; then
+        echo "Stopping authserver..."
+        pkill -f authserver || true
+        sleep 1
+        echo "Authserver stopped"
+    else
+        echo "Authserver not running"
+    fi
+fi
+
+# Stop MySQL (optional)
+if [ "$STOP_MYSQL" = true ]; then
+    if pgrep mysqld > /dev/null; then
+        echo "Stopping MySQL..."
+        sudo service mysql stop
+        echo "MySQL stopped"
+    else
+        echo "MySQL not running"
+    fi
+fi
+
+echo ""
+echo "=== Stop Complete ==="

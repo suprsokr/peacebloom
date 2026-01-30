@@ -1,0 +1,48 @@
+# Peacebloom
+
+**TrinityCore + Thorium Modding Platform**
+
+A batteries-included Docker environment for WoW Trinity Core 3.3.5 server development and modding with [the Thorium framework](https://github.com/suprsokr/thorium). Zero-config setup. Works on Linux, macOS, and Windows.
+
+## Quick Start
+
+```bash
+cp .env.example .env           # Configure your WoW client path
+docker-compose up -d           # Start container
+docker exec -it trinitycore ./scripts/setup.sh   # Automated setup
+docker exec -it trinitycore ./scripts/start-servers.sh
+```
+
+That's it.
+
+## Modding in 30 Seconds
+
+```bash
+docker exec -it trinitycore bash
+cd /home/trinitycore/mods
+
+thorium create-mod my-mod                        # Create a mod
+thorium create-migration --mod my-mod add_item   # Add a migration
+# Edit SQL files...
+thorium build && ../scripts/restart-servers.sh   # Build and restart
+```
+
+Your changes are now live. Restart your WoW client, login with admin/admin and connect to the server. Server DBCs updated, client MPQ patched, servers restarted.
+
+## Documentation
+
+| Guide | Description |
+|-------|-------------|
+| **[Installation](docs/INSTALL.md)** | Detailed setup, cross-platform paths, manual steps |
+| **[Running Servers](docs/RUN.md)** | Start/stop, accounts, console commands |
+| **[Thorium Docs](https://github.com/suprsokr/thorium/tree/main/docs)** | DBC editing, SQL migrations, LuaXML, MPQ packaging |
+
+## Requirements
+
+- Docker & Docker Compose
+- WoW 3.3.5 client
+- 8GB RAM / 50GB disk (for building)
+
+## License
+
+TrinityCore: GPL-2.0 · Thorium: See [LICENSE](https://github.com/suprsokr/thorium/blob/main/LICENSE)

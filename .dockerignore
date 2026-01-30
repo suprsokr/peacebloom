@@ -1,0 +1,25 @@
+.git
+.gitignore
+.DS_Store
+
+# Mounted directories (not needed in image)
+mods/
+tc-source/
+scripts/
+
+# Large files
+*.7z
+
+# Documentation (not needed in image)
+docs/
+*.md
+
+# IDE/Editor
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Environment files
+.env
+.env.example

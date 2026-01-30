@@ -1,0 +1,105 @@
+#!/bin/bash
+# Change password for a TrinityCore account
+# Uses SRP6 password hashing compatible with TrinityCore 3.3.5
+#
+# Usage: ./change-password.sh <username> <new_password>
+
+set -e
+
+# SRP6 parameters (from TrinityCore)
+G=7
+N_HEX="894B645E89E1535BBDAD5B8B290650530801B18EBFBF5E8FAB3C82872A3E9BB7"
+
+# Parse arguments
+USERNAME=""
+PASSWORD=""
+
+while [[ $# -gt 0 ]]; do
+    case $1 in
+        --help|-h)
+            echo "Usage: $0 <username> <new_password>"
+            echo ""
+            echo "Changes the password for an existing TrinityCore account."
+            echo ""
+            echo "Examples:"
+            echo "  $0 admin newpassword123"
+            echo "  $0 myplayer secretpass"
+            exit 0
+            ;;
+        *)
+            if [ -z "$USERNAME" ]; then
+                USERNAME="$1"
+            elif [ -z "$PASSWORD" ]; then
+                PASSWORD="$1"
+            else
+                echo "Unknown argument: $1"
+                exit 1
+            fi
+            shift
+            ;;
+    esac
+done
+
+if [ -z "$USERNAME" ] || [ -z "$PASSWORD" ]; then
+    echo "Usage: $0 <username> <new_password>"
+    exit 1
+fi
+
+# Convert to uppercase (SRP6 requires this)
+USERNAME_UPPER=$(echo "$USERNAME" | tr '[:lower:]' '[:upper:]')
+PASSWORD_UPPER=$(echo "$PASSWORD" | tr '[:lower:]' '[:upper:]')
+
+# Check if account exists
+ACCOUNT_ID=$(sudo mysql -N -e "SELECT id FROM auth.account WHERE username = '$USERNAME_UPPER';" 2>/dev/null)
+
+if [ -z "$ACCOUNT_ID" ]; then
+    echo "Error: Account '$USERNAME' not found!"
+    exit 1
+fi
+
+echo "Changing password for account: $USERNAME"
+
+# Generate random 32-byte salt
+SALT_HEX=$(openssl rand -hex 32)
+
+# Calculate verifier using SRP6 algorithm:
+# verifier = g ^ SHA1(salt || SHA1(username || ":" || password)) mod N
+
+# Step 1: Calculate inner hash: SHA1(USERNAME:PASSWORD)
+INNER_HASH=$(echo -n "${USERNAME_UPPER}:${PASSWORD_UPPER}" | openssl dgst -sha1 -binary | xxd -p -c 40)
+
+# Step 2: Calculate x = SHA1(salt || inner_hash)
+X_HASH=$(echo -n "${SALT_HEX}${INNER_HASH}" | xxd -r -p | openssl dgst -sha1 -binary | xxd -p -c 40)
+
+# Step 3: Calculate verifier = g^x mod N using Python
+VERIFIER_HEX=$(python3 << EOF
+g = $G
+N = int("$N_HEX", 16)
+x = int("$X_HASH", 16)
+verifier = pow(g, x, N)
+# Convert to 32-byte hex, little-endian (TrinityCore stores it this way)
+v_bytes = verifier.to_bytes(32, byteorder='little')
+print(v_bytes.hex())
+EOF
+)
+
+# Convert salt to little-endian for storage
+SALT_LE=$(python3 << EOF
+salt_bytes = bytes.fromhex("$SALT_HEX")
+print(salt_bytes[::-1].hex())
+EOF
+)
+
+# Update account in database
+sudo mysql auth << EOF
+UPDATE account 
+SET salt = X'$SALT_LE', verifier = X'$VERIFIER_HEX'
+WHERE id = $ACCOUNT_ID;
+EOF
+
+echo ""
+echo "=== Password Changed ==="
+echo "Username: $USERNAME"
+echo "New Password: $PASSWORD"
+echo ""
+echo "The change takes effect immediately (no server restart needed)."
