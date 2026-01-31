@@ -1,5 +1,17 @@
 # Running the Servers
 
+## Updating Thorium
+
+To get the latest Thorium version, stop the containers, rebuild the Docker images without cache, and start them again:
+
+```bash
+docker-compose down
+docker-compose build --no-cache
+docker-compose up -d
+```
+
+This ensures you're using the most recent Thorium release.
+
 ## Starting Servers
 
 ### Quick Start (Interactive Console)

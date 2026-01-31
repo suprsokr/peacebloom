@@ -225,15 +225,7 @@ fi
 echo ""
 echo "=== Setting up Thorium Modding Framework ==="
 
-if [ -d /home/peacebloom/thorium ]; then
-    # Build Thorium CLI if not already built
-    if ! command -v thorium &> /dev/null; then
-        echo "Building Thorium CLI..."
-        build-thorium
-    else
-        echo "Thorium CLI already installed: $(thorium version)"
-    fi
-    
+if [ -d /home/peacebloom/thorium ]; then    
     # Initialize Thorium workspace in mods directory if not already done
     if [ ! -f /home/peacebloom/mods/config.json ]; then
         echo "Initializing Thorium workspace in /home/peacebloom/mods..."
@@ -242,6 +234,20 @@ if [ -d /home/peacebloom/thorium ]; then
         echo "Thorium workspace initialized!"
     else
         echo "Thorium workspace already initialized."
+    fi
+    
+    # Configure Thorium config.json with container paths
+    # The host's WOTLK_PATH is mounted at /wotlk inside the container
+    # We need to resolve the ${WOTLK_PATH} placeholder to the actual container path
+    CONFIG_FILE="/home/peacebloom/mods/config.json"
+    if [ -f "$CONFIG_FILE" ]; then
+        echo "Configuring Thorium paths..."
+        # Use sed to replace environment variable placeholders with actual container paths
+        # Inside the container, WOTLK is always mounted at /wotlk
+        sed -i 's|\${WOTLK_PATH}|/wotlk|g' "$CONFIG_FILE"
+        # TC server path is always at /home/peacebloom/server
+        sed -i 's|\${TC_SERVER_PATH}|/home/peacebloom/server|g' "$CONFIG_FILE"
+        echo "Thorium config.json updated with container paths."
     fi
     
     # Extract DBCs from WoW client if not already done

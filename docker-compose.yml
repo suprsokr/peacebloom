@@ -1,7 +1,7 @@
 services:
   peacebloom:
     build: .
-    image: suprsokr/peacebloom-base:24.04
+    image: peacebloom:latest
     container_name: peacebloom
     command: /bin/bash -c "tail -f /dev/null"
     volumes:

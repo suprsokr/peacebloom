@@ -6,9 +6,9 @@
 
 FROM suprsokr/peacebloom-base:24.04
 
-# Add peacebloom user to sudoers (user already exists in base image)
+# Create peacebloom user and add to sudoers
 USER root
-RUN grep -q "peacebloom ALL=(ALL) NOPASSWD:ALL" /etc/sudoers 2>/dev/null || \
+RUN useradd -m -s /bin/bash peacebloom && \
     echo "peacebloom ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
 
 # Create directory structure and symlinks for convenience
@@ -26,12 +26,20 @@ ENV PATH="/home/peacebloom/scripts:${PATH}"
 
 # Download Thorium CLI from GitHub releases
 # Detect architecture and download appropriate binary
+USER root
 RUN ARCH=$(uname -m) && \
     if [ "$ARCH" = "x86_64" ]; then THORIUM_ARCH="amd64"; \
     elif [ "$ARCH" = "aarch64" ]; then THORIUM_ARCH="arm64"; \
     else echo "Unsupported architecture: $ARCH" && exit 1; fi && \
-    curl -L "https://github.com/suprsokr/thorium/releases/latest/download/thorium-linux-${THORIUM_ARCH}" -o /tmp/thorium && \
+    DOWNLOAD_URL=$(curl -s https://api.github.com/repos/suprsokr/thorium/releases/latest | grep '"browser_download_url":' | grep "linux-${THORIUM_ARCH}" | grep -o 'https://[^"]*' | head -1) && \
+    if [ -z "$DOWNLOAD_URL" ]; then echo "Error: Could not find download URL for linux-${THORIUM_ARCH}" && exit 1; fi && \
+    echo "Downloading Thorium from: $DOWNLOAD_URL" && \
+    curl -L "$DOWNLOAD_URL" -o /tmp/thorium && \
+    if [ ! -f /tmp/thorium ]; then echo "Error: Download failed" && exit 1; fi && \
     chmod +x /tmp/thorium && \
-    sudo mv /tmp/thorium /usr/local/bin/thorium
+    mv /tmp/thorium /usr/local/bin/thorium && \
+    if [ ! -f /usr/local/bin/thorium ]; then echo "Error: Installation failed" && exit 1; fi
+
+USER peacebloom
 
 CMD ["/bin/bash"]
