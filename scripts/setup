@@ -284,6 +284,19 @@ if [ -d /home/peacebloom/thorium ]; then
     
     sudo mysql -e "FLUSH PRIVILEGES;"
     
+    # Import DBCs from TrinityCore's extracted dbc folder into database
+    # The mapextractor places DBCs in /home/peacebloom/server/bin/dbc/
+    TC_DBC_PATH="/home/peacebloom/server/bin/dbc"
+    if [ -d "$TC_DBC_PATH" ] && [ -n "$(ls -A $TC_DBC_PATH/*.dbc 2>/dev/null)" ]; then
+        echo "Importing DBCs into database..."
+        cd /home/peacebloom/mods
+        thorium import dbc --source "$TC_DBC_PATH"
+        echo "DBC import complete!"
+    else
+        echo "Note: No DBC files found at $TC_DBC_PATH"
+        echo "Run mapextractor first, then 'thorium import dbc --source /path/to/dbc'"
+    fi
+    
     echo "Thorium setup complete!"
 else
     echo "Note: Thorium source not found at /home/peacebloom/thorium"
