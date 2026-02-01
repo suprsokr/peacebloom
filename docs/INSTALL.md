@@ -163,7 +163,7 @@ See [RUN.md](RUN.md) for more server management options.
 |--------------|----------------|---------|
 | `server` | `/home/peacebloom/server` | Binaries, configs, maps, TDB |
 | `mysql_data` | `/var/lib/mysql` | MySQL database files |
-| `./mods` | `/home/peacebloom/mods` | Thorium workspace |
+| `./mods` | `/home/peacebloom/thorium-workspace` | Thorium workspace |
 | `./tc-source` | `/home/peacebloom/TrinityCore` | TC source |
 | `./scripts` | `/home/peacebloom/scripts` | Container scripts |
 | `${WOTLK_PATH}` | `/wotlk` | WoW 3.3.5 client |

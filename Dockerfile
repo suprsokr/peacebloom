@@ -16,7 +16,7 @@ USER root
 RUN mkdir -p /home/peacebloom/server/etc \
     /home/peacebloom/server/bin && \
     chown -R peacebloom:peacebloom /home/peacebloom/server && \
-    ln -s /home/peacebloom/mods /mods
+    ln -s /home/peacebloom/thorium-workspace /mods
 
 USER peacebloom
 WORKDIR /home/peacebloom

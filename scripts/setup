@@ -227,9 +227,9 @@ echo "=== Setting up Thorium Modding Framework ==="
 
 if [ -d /home/peacebloom/thorium ]; then    
     # Initialize Thorium workspace in mods directory if not already done
-    if [ ! -f /home/peacebloom/mods/config.json ]; then
-        echo "Initializing Thorium workspace in /home/peacebloom/mods..."
-        cd /home/peacebloom/mods
+    if [ ! -f /home/peacebloom/thorium-workspace/config.json ]; then
+        echo "Initializing Thorium workspace in /home/peacebloom/thorium-workspace..."
+        cd /home/peacebloom/thorium-workspace
         thorium init
         echo "Thorium workspace initialized!"
     else
@@ -242,18 +242,18 @@ if [ -d /home/peacebloom/thorium ]; then
     #   WOTLK_PATH -> /wotlk (mounted from host)
     #   TC_SOURCE_PATH -> /home/peacebloom/TrinityCore
     #   TC_SERVER_PATH -> /home/peacebloom/server
-    CONFIG_FILE="/home/peacebloom/mods/config.json"
+    CONFIG_FILE="/home/peacebloom/thorium-workspace/config.json"
     if [ -f "$CONFIG_FILE" ]; then
         echo "Thorium config.json found - ready to use with container defaults."
     fi
     
     # Extract DBCs from WoW client if not already done
-    if [ -d /wotlk/Data ] && [ ! -d /home/peacebloom/mods/dbc ]; then
+    if [ -d /wotlk/Data ] && [ ! -d /home/peacebloom/thorium-workspace/dbc ]; then
         echo "Extracting DBCs from WoW client..."
-        cd /home/peacebloom/mods
+        cd /home/peacebloom/thorium-workspace
         thorium extract --dbc
         echo "DBC extraction complete!"
-    elif [ -d /home/peacebloom/mods/dbc ]; then
+    elif [ -d /home/peacebloom/thorium-workspace/dbc ]; then
         echo "DBCs already extracted."
     fi
     
@@ -286,7 +286,7 @@ if [ -d /home/peacebloom/thorium ]; then
     TC_DBC_PATH="/home/peacebloom/server/bin/dbc"
     if [ -d "$TC_DBC_PATH" ] && [ -n "$(ls -A $TC_DBC_PATH/*.dbc 2>/dev/null)" ]; then
         echo "Importing DBCs into database..."
-        cd /home/peacebloom/mods
+        cd /home/peacebloom/thorium-workspace
         thorium import dbc --source "$TC_DBC_PATH"
         echo "DBC import complete!"
     else

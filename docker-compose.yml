@@ -21,7 +21,7 @@ services:
       # Configure WOTLK_PATH in your .env file
       - ${WOTLK_PATH}:/wotlk:rw
       # Mount mods workspace (edit with your IDE)
-      - ./mods:/home/peacebloom/mods
+      - ./mods:/home/peacebloom/thorium-workspace
       # Mount TrinityCore source (edit with your IDE, cloned by setup)
       - ./tc-source:/home/peacebloom/TrinityCore
       # Mount scripts (editable without rebuilding image)

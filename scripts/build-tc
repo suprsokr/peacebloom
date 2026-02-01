@@ -22,17 +22,32 @@ fi
 
 cd build
 
-# Configure CMake with debug/development flags
-echo "Configuring CMake..."
-cmake ../ \
-    -DCMAKE_BUILD_TYPE=Debug \
-    -DWITH_WARNINGS=0 \
-    -DUSE_SCRIPTPCH=0 \
-    -DUSE_COREPCH=0 \
-    -DTOOLS=1 \
-    -DSERVERS=1 \
-    -DSCRIPTS=minimal-dynamic \
-    -DCMAKE_INSTALL_PREFIX=/home/peacebloom/server
+# Only run CMake if not configured yet, or if --configure flag passed
+NEEDS_CMAKE=false
+if [ ! -f "Makefile" ]; then
+    NEEDS_CMAKE=true
+fi
+if [ "$1" = "--configure" ] || [ "$1" = "-c" ]; then
+    NEEDS_CMAKE=true
+fi
+
+if [ "$NEEDS_CMAKE" = true ]; then
+    echo "Configuring CMake..."
+    # Enables spells, commands and custom scripts.
+    cmake ../ \
+        -DCMAKE_BUILD_TYPE=Debug \
+        -DWITH_WARNINGS=0 \
+        -DUSE_SCRIPTPCH=1 \
+        -DUSE_COREPCH=1 \
+        -DTOOLS=0 \
+        -DWITH_WARNINGS=1 \
+        -DSERVERS=1 \
+        -DSCRIPTS=minimal-static \
+        -DSCRIPTS_CUSTOM=static \
+        -DCMAKE_INSTALL_PREFIX=/home/peacebloom/server
+else
+    echo "Skipping CMake (already configured). Use --configure to reconfigure."
+fi
 
 # Build
 echo "Building TrinityCore..."
