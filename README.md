@@ -12,7 +12,7 @@ cp .env.example .env
 # Edit .env and set WOTLK_PATH to your WoW 3.3.5 client directory
 docker-compose build
 docker-compose up -d 
-docker exec -it peacebloom setup
+docker exec -it peacebloom setup -y
 docker exec -it peacebloom start
 ```
 

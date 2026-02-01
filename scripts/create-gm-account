@@ -68,8 +68,6 @@ fi
 USERNAME_UPPER=$(echo "$USERNAME" | tr '[:lower:]' '[:upper:]')
 PASSWORD_UPPER=$(echo "$PASSWORD" | tr '[:lower:]' '[:upper:]')
 
-echo "Creating account: $USERNAME (GM level: $GMLEVEL)"
-
 # Check if account already exists
 EXISTING=$(mysql -utrinity -ptrinity -N -e "SELECT COUNT(*) FROM auth.account WHERE username = '$USERNAME_UPPER';" 2>&1 | grep -v "Warning" || echo "0")
 
@@ -143,9 +141,6 @@ if [ "$GMLEVEL" -gt 0 ]; then
 INSERT INTO account_access (AccountID, SecurityLevel, RealmID, Comment)
 VALUES ($ACCOUNT_ID, $GMLEVEL, -1, 'Created by create-gm-account');
 EOF
-    echo "Account created with GM level $GMLEVEL"
-else
-    echo "Account created (Player)"
 fi
 
 echo ""

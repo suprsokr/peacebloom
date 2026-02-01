@@ -315,13 +315,7 @@ ACCOUNT_COUNT=$(sudo mysql -N -e "SELECT COUNT(*) FROM auth.account;" 2>/dev/nul
 if [ "$ACCOUNT_COUNT" = "0" ]; then
     echo "No accounts found. Creating default admin account..."
     create-gm-account admin admin --gm
-    echo ""
-    echo "Default admin account created!"
-    echo "  Username: admin"
-    echo "  Password: admin"
-    echo "  GM Level: 3 (Administrator)"
-    echo ""
-    echo "IMPORTANT: Change this password!"
+    echo "IMPORTANT: Change this password after first login!"
     echo "  docker exec -it peacebloom change-password admin <new_password>"
 else
     echo "Accounts already exist ($ACCOUNT_COUNT found). Skipping default account creation."
