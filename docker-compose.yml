@@ -4,6 +4,14 @@ services:
     image: peacebloom:latest
     container_name: peacebloom
     command: /bin/bash -c "tail -f /dev/null"
+    environment:
+      # Thorium configuration - these match the defaults in config.json
+      - WOTLK_PATH=/wotlk
+      - TC_SOURCE_PATH=/home/peacebloom/TrinityCore
+      - TC_SERVER_PATH=/home/peacebloom/server
+      # MySQL configuration
+      - MYSQL_HOST=127.0.0.1
+      - MYSQL_PORT=3306
     volumes:
       # Persist compiled binaries, configs, and extracted maps
       - server:/home/peacebloom/server
