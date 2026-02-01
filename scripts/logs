@@ -1,0 +1,49 @@
+#!/bin/bash
+# View server logs
+
+LOG_DIR="/home/peacebloom/server/logs"
+
+if [ "$1" == "world" ] || [ "$1" == "worldserver" ]; then
+    echo "=== Worldserver Logs (Ctrl+C to exit) ==="
+    tail -f "$LOG_DIR/worldserver.log"
+elif [ "$1" == "auth" ] || [ "$1" == "authserver" ]; then
+    echo "=== Authserver Logs (Ctrl+C to exit) ==="
+    tail -f "$LOG_DIR/authserver.log"
+elif [ "$1" == "cat" ] && [ -n "$2" ]; then
+    # Show full log file
+    if [ "$2" == "world" ] || [ "$2" == "worldserver" ]; then
+        cat "$LOG_DIR/worldserver.log"
+    elif [ "$2" == "auth" ] || [ "$2" == "authserver" ]; then
+        cat "$LOG_DIR/authserver.log"
+    else
+        echo "Unknown log: $2"
+        exit 1
+    fi
+elif [ "$1" == "grep" ] && [ -n "$2" ]; then
+    # Search logs
+    PATTERN="$2"
+    shift 2
+    LOG="${1:-world}"
+    
+    if [ "$LOG" == "world" ] || [ "$LOG" == "worldserver" ]; then
+        grep -i "$PATTERN" "$LOG_DIR/worldserver.log" "$@"
+    elif [ "$LOG" == "auth" ] || [ "$LOG" == "authserver" ]; then
+        grep -i "$PATTERN" "$LOG_DIR/authserver.log" "$@"
+    else
+        echo "Unknown log: $LOG"
+        exit 1
+    fi
+else
+    echo "Usage:"
+    echo "  logs world              - Tail worldserver logs"
+    echo "  logs auth               - Tail authserver logs"
+    echo "  logs cat world          - Show full worldserver log"
+    echo "  logs cat auth           - Show full authserver log"
+    echo "  logs grep <pattern> [world|auth]  - Search logs for pattern"
+    echo ""
+    echo "Example:"
+    echo "  logs world"
+    echo "  logs grep 'custom' world"
+    echo "  logs grep 'Loading.*Handler' world"
+    exit 1
+fi
