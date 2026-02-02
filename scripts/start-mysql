@@ -1,0 +1,107 @@
+#!/bin/bash
+# Start MySQL and optionally open an interactive SQL session
+
+set -e
+
+# Parse arguments
+INTERACTIVE=false
+DATABASE=""
+if [ "$1" == "--interactive" ] || [ "$1" == "-i" ]; then
+    INTERACTIVE=true
+    if [ -n "$2" ]; then
+        DATABASE="$2"
+    fi
+elif [ -n "$1" ] && [ "$1" != "--help" ] && [ "$1" != "-h" ]; then
+    DATABASE="$1"
+fi
+
+if [ "$1" == "--help" ] || [ "$1" == "-h" ]; then
+    echo "Usage: start-mysql [--interactive|-i] [database]"
+    echo ""
+    echo "Start MySQL and optionally open an interactive SQL session."
+    echo ""
+    echo "Options:"
+    echo "  --interactive, -i    Open interactive MySQL session"
+    echo "  database             Database name to use (default: none)"
+    echo ""
+    echo "Examples:"
+    echo "  start-mysql                    # Start MySQL only"
+    echo "  start-mysql -i                 # Start MySQL and open interactive session"
+    echo "  start-mysql -i world           # Start MySQL and connect to 'world' database"
+    echo "  start-mysql world              # Start MySQL and connect to 'world' database"
+    exit 0
+fi
+
+echo "=== Starting MySQL ==="
+
+# Ensure MySQL is running
+if ! pgrep mysqld > /dev/null; then
+    echo "Starting MySQL service..."
+    # Fix mysql user home directory to prevent "cannot change directory to /nonexistent" warning
+    sudo mkdir -p /nonexistent
+    sudo chown mysql:mysql /nonexistent
+    sudo chown -R mysql:mysql /var/lib/mysql
+    sudo service mysql start
+    sleep 3
+    
+    # Wait for MySQL to be ready
+    echo "Waiting for MySQL to be ready..."
+    for i in {1..30}; do
+        if sudo mysql -e "SELECT 1" >/dev/null 2>&1; then
+            echo "MySQL is ready!"
+            break
+        fi
+        if [ $i -eq 30 ]; then
+            echo "ERROR: MySQL did not become ready after 30 attempts"
+            echo "Check MySQL logs: sudo tail -50 /var/log/mysql/error.log"
+            exit 1
+        fi
+        echo "Attempt $i/30: Waiting for MySQL..."
+        sleep 2
+    done
+    
+    # Verify MySQL is accessible
+    if ! sudo mysql -e "SELECT 1" >/dev/null 2>&1; then
+        echo "ERROR: Cannot connect to MySQL"
+        echo "Check MySQL logs: sudo tail -50 /var/log/mysql/error.log"
+        exit 1
+    fi
+else
+    echo "MySQL is already running"
+    # Quick check to verify it's actually accessible
+    if ! sudo mysql -e "SELECT 1" >/dev/null 2>&1; then
+        echo "Warning: MySQL process is running but not responding to connections"
+        echo "Check MySQL logs: sudo tail -50 /var/log/mysql/error.log"
+        exit 1
+    fi
+fi
+
+# Show database status
+echo ""
+echo "=== Database Status ==="
+sudo mysql -e "SHOW DATABASES;" 2>/dev/null | grep -E "(Database|auth|characters|world|dbc)" || true
+
+# Open interactive session if requested
+if [ "$INTERACTIVE" = true ] || [ -n "$DATABASE" ]; then
+    echo ""
+    echo "=== Opening MySQL Session ==="
+    if [ -n "$DATABASE" ]; then
+        echo "Connecting to database: $DATABASE"
+        echo "Use 'trinity' user: mysql -utrinity -ptrinity $DATABASE"
+        echo ""
+        mysql -utrinity -ptrinity "$DATABASE"
+    else
+        echo "Opening interactive MySQL session"
+        echo "Use 'trinity' user: mysql -utrinity -ptrinity"
+        echo ""
+        mysql -utrinity -ptrinity
+    fi
+else
+    echo ""
+    echo "MySQL is running and ready!"
+    echo ""
+    echo "To connect interactively:"
+    echo "  start-mysql -i                 # Interactive session"
+    echo "  start-mysql -i world           # Connect to 'world' database"
+    echo "  mysql -utrinity -ptrinity world  # Direct connection"
+fi

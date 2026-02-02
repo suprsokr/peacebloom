@@ -1,0 +1,46 @@
+#!/bin/bash
+# Stop MySQL service
+
+set -e
+
+if [ "$1" == "--help" ] || [ "$1" == "-h" ]; then
+    echo "Usage: stop-mysql"
+    echo ""
+    echo "Stop the MySQL service."
+    echo ""
+    echo "This will stop MySQL, which will disconnect all database connections."
+    echo "Note: This will also stop any running TrinityCore servers that depend on MySQL."
+    exit 0
+fi
+
+echo "=== Stopping MySQL ==="
+
+# Check if MySQL is running (match any process containing mysqld, like start-mysql does)
+if ! pgrep mysqld > /dev/null 2>&1; then
+    echo "MySQL is not running"
+    exit 0
+fi
+
+echo "Stopping MySQL service..."
+sudo service mysql stop
+
+# Wait for MySQL to fully stop (may take a few seconds)
+echo "Waiting for MySQL to stop..."
+for i in {1..10}; do
+    if ! pgrep mysqld > /dev/null 2>&1; then
+        echo "MySQL stopped successfully"
+        exit 0
+    fi
+    sleep 1
+done
+
+# Final check
+if pgrep mysqld > /dev/null 2>&1; then
+    echo "Warning: MySQL process still detected after 10 seconds"
+    echo "This may be normal if MySQL is still shutting down gracefully"
+    echo "Check with: pgrep mysqld"
+    echo "Or force kill with: sudo pkill -9 mysqld"
+    exit 1
+else
+    echo "MySQL stopped successfully"
+fi
