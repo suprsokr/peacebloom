@@ -22,7 +22,7 @@ That's it. Login as admin/admin to your dev Trinity Core 3.3.5 server.
 
 ```bash
 docker exec -it peacebloom bash
-cd mods
+cd /thorium-workspace  # or cd ~/thorium-workspace
 thorium create-mod my-mod   # Create a mod
 thorium create-migration --mod my-mod adding_an_item   # Add a migration
 # Edit SQL files...

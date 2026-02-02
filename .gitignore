@@ -14,8 +14,8 @@ Thumbs.db
 # TrinityCore source (cloned during setup)
 tc-source/
 
-# Mods workspace (created/populated by thorium commands)
-mods/
+# Thorium workspace (created/populated by thorium commands)
+thorium-workspace/
 
 # Large files
 *.7z

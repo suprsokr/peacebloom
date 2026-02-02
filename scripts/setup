@@ -226,7 +226,7 @@ echo ""
 echo "=== Setting up Thorium Modding Framework ==="
 
 if [ -d /home/peacebloom/thorium ]; then    
-    # Initialize Thorium workspace in mods directory if not already done
+    # Initialize Thorium workspace if not already done
     if [ ! -f /home/peacebloom/thorium-workspace/config.json ]; then
         echo "Initializing Thorium workspace in /home/peacebloom/thorium-workspace..."
         cd /home/peacebloom/thorium-workspace
@@ -264,7 +264,7 @@ if [ -d /home/peacebloom/thorium ]; then
     # Grant permissions to root (used by Thorium with socket auth)
     sudo mysql -e "GRANT ALL PRIVILEGES ON dbc.* TO 'root'@'localhost';"
     
-    # Create trinity user for world database access (matches mods/config.json)
+    # Create trinity user for world database access (matches thorium-workspace/config.json)
     echo "Creating trinity database user..."
     sudo mysql -e "CREATE USER IF NOT EXISTS 'trinity'@'localhost' IDENTIFIED BY 'trinity';"
     sudo mysql -e "GRANT ALL PRIVILEGES ON world.* TO 'trinity'@'localhost';"
@@ -331,6 +331,6 @@ echo "  docker exec -it peacebloom bash"
 echo ""
 echo "For Thorium modding:"
 echo "  docker exec -it peacebloom bash"
-echo "  cd /mods"
+echo "  cd /thorium-workspace  # or cd ~/thorium-workspace"
 echo "  thorium help"
 echo ""

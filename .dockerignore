@@ -3,7 +3,7 @@
 .DS_Store
 
 # Mounted directories (not needed in image)
-mods/
+thorium-workspace/
 tc-source/
 scripts/
 

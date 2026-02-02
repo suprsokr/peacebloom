@@ -150,7 +150,7 @@ See [RUN.md](RUN.md) for more server management options.
 
 ```
 ├── tc-source/           # TrinityCore source (cloned by setup)
-├── mods/                # Thorium workspace
+├── thorium-workspace/   # Thorium workspace
 ├── scripts/             # Container scripts
 ├── Dockerfile           # Container definition
 ├── docker-compose.yml   # Docker services
@@ -163,7 +163,7 @@ See [RUN.md](RUN.md) for more server management options.
 |--------------|----------------|---------|
 | `server` | `/home/peacebloom/server` | Binaries, configs, maps, TDB |
 | `mysql_data` | `/var/lib/mysql` | MySQL database files |
-| `./mods` | `/home/peacebloom/thorium-workspace` | Thorium workspace |
+| `./thorium-workspace` | `/home/peacebloom/thorium-workspace` | Thorium workspace |
 | `./tc-source` | `/home/peacebloom/TrinityCore` | TC source |
 | `./scripts` | `/home/peacebloom/scripts` | Container scripts |
 | `${WOTLK_PATH}` | `/wotlk` | WoW 3.3.5 client |
@@ -195,8 +195,8 @@ After setup, Thorium is ready to use:
 # Enter container
 docker exec -it peacebloom bash
 
-# Go to mods workspace
-cd /mods
+# Go to thorium workspace
+cd /thorium-workspace  # or cd ~/thorium-workspace
 
 # Check Thorium is installed
 thorium version
