@@ -5,64 +5,43 @@
 # 1. Bootstrap mode (no existing accounts): Creates account directly in database using SRP6
 # 2. SOAP mode (existing GM account): Uses SOAP API for account creation
 #
-# Usage: create-gm-account <username> <password> [--gm]
-#        create-gm-account <username> <password> --gmlevel <0-3>
+# Usage: create-gm-account <username> <password> [gm_level]
 #
 # GM Levels:
-#   0 = Player (default)
+#   0 = Player
 #   1 = Moderator
 #   2 = GameMaster  
-#   3 = Administrator
+#   3 = Administrator (default)
 
 set -e
 
 # Parse arguments
-USERNAME=""
-PASSWORD=""
-GMLEVEL=0
+if [ "$1" == "--help" ] || [ "$1" == "-h" ]; then
+    echo "Usage: $0 <username> <password> [gm_level]"
+    echo ""
+    echo "Creates a TrinityCore account."
+    echo ""
+    echo "Arguments:"
+    echo "  username   Account username"
+    echo "  password   Account password"
+    echo "  gm_level   GM level (0=Player, 1=Mod, 2=GM, 3=Admin, default: 3)"
+    echo ""
+    echo "Examples:"
+    echo "  $0 admin password123      # Creates admin account with GM level 3"
+    echo "  $0 player mypass 0       # Creates regular player account"
+    echo "  $0 gm mypass 2           # Creates GameMaster account"
+    exit 0
+fi
 
-while [[ $# -gt 0 ]]; do
-    case $1 in
-        --gm)
-            GMLEVEL=3
-            shift
-            ;;
-        --gmlevel)
-            GMLEVEL="$2"
-            shift 2
-            ;;
-        --help|-h)
-            echo "Usage: $0 <username> <password> [--gm] [--gmlevel <0-3>]"
-            echo ""
-            echo "Creates a TrinityCore account."
-            echo ""
-            echo "Options:"
-            echo "  --gm           Set GM level to 3 (Administrator)"
-            echo "  --gmlevel <n>  Set specific GM level (0=Player, 1=Mod, 2=GM, 3=Admin)"
-            echo ""
-            echo "Examples:"
-            echo "  $0 admin password123 --gm"
-            echo "  $0 player mypass"
-            exit 0
-            ;;
-        *)
-            if [ -z "$USERNAME" ]; then
-                USERNAME="$1"
-            elif [ -z "$PASSWORD" ]; then
-                PASSWORD="$1"
-            else
-                echo "Unknown argument: $1"
-                exit 1
-            fi
-            shift
-            ;;
-    esac
-done
-
-if [ -z "$USERNAME" ] || [ -z "$PASSWORD" ]; then
-    echo "Usage: $0 <username> <password> [--gm] [--gmlevel <0-3>]"
+if [ $# -lt 2 ]; then
+    echo "Usage: $0 <username> <password> [gm_level]"
+    echo "Run '$0 --help' for more information"
     exit 1
 fi
+
+USERNAME="$1"
+PASSWORD="$2"
+GMLEVEL="${3:-3}"  # Default to 3 if not provided
 
 # Convert to uppercase (SRP6 requires this)
 USERNAME_UPPER=$(echo "$USERNAME" | tr '[:lower:]' '[:upper:]')

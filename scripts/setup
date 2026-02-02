@@ -179,12 +179,13 @@ echo "Creating TrinityCore databases..."
 # The TrinityCore create_mysql.sql uses CREATE USER without IF NOT EXISTS,
 # so we handle the case where databases/user already exist
 sudo mysql -e "CREATE USER IF NOT EXISTS 'trinity'@'localhost' IDENTIFIED BY 'trinity';"
+sudo mysql -e "CREATE USER IF NOT EXISTS 'trinity'@'%' IDENTIFIED BY 'trinity';"
 sudo mysql -e "CREATE DATABASE IF NOT EXISTS world DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
 sudo mysql -e "CREATE DATABASE IF NOT EXISTS characters DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
 sudo mysql -e "CREATE DATABASE IF NOT EXISTS auth DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
-sudo mysql -e "GRANT ALL PRIVILEGES ON world.* TO 'trinity'@'localhost' WITH GRANT OPTION;"
-sudo mysql -e "GRANT ALL PRIVILEGES ON characters.* TO 'trinity'@'localhost' WITH GRANT OPTION;"
-sudo mysql -e "GRANT ALL PRIVILEGES ON auth.* TO 'trinity'@'localhost' WITH GRANT OPTION;"
+sudo mysql -e "GRANT ALL PRIVILEGES ON *.* TO 'trinity'@'localhost' WITH GRANT OPTION;"
+sudo mysql -e "GRANT ALL PRIVILEGES ON *.* TO 'trinity'@'%' WITH GRANT OPTION;"
+sudo mysql -e "FLUSH PRIVILEGES;"
 
 # Import base database schemas
 echo "Importing base database schemas..."
@@ -225,7 +226,7 @@ fi
 echo ""
 echo "=== Setting up Thorium Modding Framework ==="
 
-if [ -d /home/peacebloom/thorium ]; then    
+if command -v thorium >/dev/null 2>&1; then
     # Initialize Thorium workspace if not already done
     if [ ! -f /home/peacebloom/thorium-workspace/config.json ]; then
         echo "Initializing Thorium workspace in /home/peacebloom/thorium-workspace..."
@@ -247,57 +248,10 @@ if [ -d /home/peacebloom/thorium ]; then
         echo "Thorium config.json found - ready to use with container defaults."
     fi
     
-    # Extract DBCs from WoW client if not already done
-    if [ -d /wotlk/Data ] && [ ! -d /home/peacebloom/thorium-workspace/dbc ]; then
-        echo "Extracting DBCs from WoW client..."
-        cd /home/peacebloom/thorium-workspace
-        thorium extract --dbc
-        echo "DBC extraction complete!"
-    elif [ -d /home/peacebloom/thorium-workspace/dbc ]; then
-        echo "DBCs already extracted."
-    fi
-    
-    # Create DBC database for Thorium
-    echo "Creating Thorium DBC database..."
-    sudo mysql -e "CREATE DATABASE IF NOT EXISTS dbc CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
-    
-    # Grant permissions to root (used by Thorium with socket auth)
-    sudo mysql -e "GRANT ALL PRIVILEGES ON dbc.* TO 'root'@'localhost';"
-    
-    # Create trinity user for world database access (matches thorium-workspace/config.json)
-    echo "Creating trinity database user..."
-    sudo mysql -e "CREATE USER IF NOT EXISTS 'trinity'@'localhost' IDENTIFIED BY 'trinity';"
-    sudo mysql -e "GRANT ALL PRIVILEGES ON world.* TO 'trinity'@'localhost';"
-    sudo mysql -e "GRANT ALL PRIVILEGES ON auth.* TO 'trinity'@'localhost';"
-    sudo mysql -e "GRANT ALL PRIVILEGES ON characters.* TO 'trinity'@'localhost';"
-    sudo mysql -e "GRANT ALL PRIVILEGES ON dbc.* TO 'trinity'@'localhost';"
-    
-    # Also allow connections from docker host (for external tools)
-    sudo mysql -e "CREATE USER IF NOT EXISTS 'trinity'@'%' IDENTIFIED BY 'trinity';"
-    sudo mysql -e "GRANT ALL PRIVILEGES ON world.* TO 'trinity'@'%';"
-    sudo mysql -e "GRANT ALL PRIVILEGES ON auth.* TO 'trinity'@'%';"
-    sudo mysql -e "GRANT ALL PRIVILEGES ON characters.* TO 'trinity'@'%';"
-    sudo mysql -e "GRANT ALL PRIVILEGES ON dbc.* TO 'trinity'@'%';"
-    
-    sudo mysql -e "FLUSH PRIVILEGES;"
-    
-    # Import DBCs from TrinityCore's extracted dbc folder into database
-    # The mapextractor places DBCs in /home/peacebloom/server/bin/dbc/
-    TC_DBC_PATH="/home/peacebloom/server/bin/dbc"
-    if [ -d "$TC_DBC_PATH" ] && [ -n "$(ls -A $TC_DBC_PATH/*.dbc 2>/dev/null)" ]; then
-        echo "Importing DBCs into database..."
-        cd /home/peacebloom/thorium-workspace
-        thorium import dbc --source "$TC_DBC_PATH"
-        echo "DBC import complete!"
-    else
-        echo "Note: No DBC files found at $TC_DBC_PATH"
-        echo "Run mapextractor first, then 'thorium import dbc --source /path/to/dbc'"
-    fi
-    
     echo "Thorium setup complete!"
 else
-    echo "Note: Thorium source not found at /home/peacebloom/thorium"
-    echo "The thorium/ directory should be mounted via docker-compose.yml"
+    echo "Note: Thorium CLI not found. Rebuild the Docker image to install it:"
+    echo "  docker-compose build"
 fi
 
 # =============================================================================

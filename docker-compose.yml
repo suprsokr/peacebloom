@@ -26,8 +26,6 @@ services:
       - ./tc-source:/home/peacebloom/TrinityCore
       # Mount scripts (editable without rebuilding image)
       - ./scripts:/home/peacebloom/scripts
-      # Mount Thorium source (for building from source if needed)
-      - ../thorium:/home/peacebloom/thorium
     ports:
       - "3306:3306"  # MySQL
       - "3724:3724"  # AuthServer
